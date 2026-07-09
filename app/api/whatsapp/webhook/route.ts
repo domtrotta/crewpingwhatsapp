@@ -98,6 +98,12 @@ export async function GET(request: NextRequest) {
   const mode = getQueryParam(request, 'hub.mode');
   const verifyToken = getQueryParam(request, 'hub.verify_token');
   const challenge = getQueryParam(request, 'hub.challenge');
+  console.log('[whatsapp:webhook] GET verification request', {
+    mode,
+    hasVerifyToken: Boolean(verifyToken),
+    hasChallenge: Boolean(challenge),
+    tokenMatches: verifyToken === process.env.WHATSAPP_VERIFY_TOKEN,
+  });
 
   if (verifyToken && challenge && verifyToken === process.env.WHATSAPP_VERIFY_TOKEN) {
     if (mode && mode !== 'subscribe') {
@@ -113,6 +119,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  console.log('[whatsapp:webhook] POST received');
   let payload: WhatsAppWebhookPayload | null = null;
 
   try {
@@ -123,8 +130,23 @@ export async function POST(request: NextRequest) {
   }
 
   const messages = extractMessages(payload);
+  console.log('[whatsapp:webhook] Extracted messages', {
+    count: messages.length,
+    messages: messages.map((message) => ({
+      from: message.from,
+      name: message.name,
+      text: message.text,
+      messageId: message.messageId,
+      timestamp: message.timestamp,
+    })),
+  });
 
   for (const message of messages) {
+    console.log('[whatsapp:webhook] Handling incoming message', {
+      from: message.from,
+      text: message.text,
+      messageId: message.messageId,
+    });
     void handleIncomingWhatsAppMessage(message).catch((error) => {
       console.error('[whatsapp:webhook] Message processing failed', {
         messageId: message.messageId,
