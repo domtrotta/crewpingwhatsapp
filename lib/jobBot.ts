@@ -28,7 +28,7 @@ type JobRecord = {
   call_time: string | null;
   finish_time: string | null;
   role_needed: string | null;
-  rate: string | null;cloudflared --version
+  rate: string | null;
   notes: string | null;
   posted_by_phone: string;
   posted_by_name: string | null;
@@ -803,7 +803,7 @@ async function handleTechYesFlow(from: string, text: string): Promise<boolean> {
     return true;
   }
 
-  await saveJobResponse(job.id, from, user.name ?? name ?? displayPhone(from), 'yes');
+  await saveJobResponse(job.id, from, user.name ?? displayPhone(from), 'yes');
 
   const poster = await getPosterByPhone(job.posted_by_phone);
   if (!poster) {
@@ -812,7 +812,7 @@ async function handleTechYesFlow(from: string, text: string): Promise<boolean> {
   }
 
   const recap = buildFullJobRecap(job);
-  const techName = user.name ?? name ?? displayPhone(from);
+  const techName = user.name ?? displayPhone(from);
   const posterMessage = [
     `${techName} is available for your job:`,
     '',
